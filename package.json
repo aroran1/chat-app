@@ -19,7 +19,8 @@
   },
   "homepage": "https://github.com/aroran1/chat-app#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "socket.io": "^4.0.1"
   },
   "devDependencies": {
     "env-cmd": "^10.1.0",
