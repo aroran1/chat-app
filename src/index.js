@@ -51,12 +51,20 @@ app.use(express.static(publicDirectoryPath));
 // chat
 io.on('connection', (socket) => {
   // emitting message
-  socket.emit('message', "Welcome!");
+  socket.emit('message', 'Welcome!');
+  // a new user joined chat group announcement
+  socket.broadcast.emit('message', 'A new user has joined the chat group!')
 
   // receiving message
   socket.on('sendMessage', (message) => {
     // emit to update all clients
     io.emit('message', message)
+  })
+
+  // disconneting a socket connection
+  socket.on('disconnect', () => {
+    // socket has already been disconnected so can't emit anymore hence io.emit to announce to all connections
+    io.emit('message', 'A user has left!');
   })
 })
 

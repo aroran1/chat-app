@@ -12,3 +12,4 @@ Client (emit) >>>>>> Server (receive)
 ## Guides
 - [Web Sockets](./guides/WebSockets.md)
 - [Real Time](./guides/Realtime.md)
+- [Chat](./guides/Chat.md)

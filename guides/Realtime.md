@@ -126,4 +126,3 @@ document.querySelector('#increment').addEventListener('click', () => {
   </body>
 </html>
 ```
-
