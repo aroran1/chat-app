@@ -61,6 +61,12 @@ io.on('connection', (socket) => {
     io.emit('message', message)
   })
 
+  // recieve Location
+  socket.on('sendLocation', (coords) => {
+    // https://www.google.com/maps?q=0,0
+    io.emit('message', `Location: https://www.google.com/maps?q=${coords.latitude},${coords.longitude}`)
+  })
+
   // disconneting a socket connection
   socket.on('disconnect', () => {
     // socket has already been disconnected so can't emit anymore hence io.emit to announce to all connections
