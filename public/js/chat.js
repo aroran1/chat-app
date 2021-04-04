@@ -11,7 +11,18 @@ document.querySelector('#message-form').addEventListener('submit', (e) => {
   // const message = document.querySelector('input').value;
   const message = e.target.elements.message.value
   // emitting message
-  socket.emit('sendMessage', message)
+  // socket.emit('sendMessage', message, (ackMsg) => {
+  //   // logging acknowledge message with returned acknowledge message ackMsg = 'Delivered!'
+  //   console.log('This message is delivered!', ackMsg);
+  // })
+
+  socket.emit('sendMessage', message, (error) => {
+    // logging acknowledge message with returned acknowledge message ackMsg = 'Delivered!'
+    if (error) {
+       return console.log(error);
+    }
+    console.log('Message delivered!');
+  })
 });
 
 document.querySelector('#send-location').addEventListener('click', () => {
@@ -24,6 +35,8 @@ document.querySelector('#send-location').addEventListener('click', () => {
     socket.emit('sendLocation', {
       latitude: position.coords.latitude,
       longitude: position.coords.longitude
+    }, () => {
+      console.log('Location shared!');
     });
   })
 })

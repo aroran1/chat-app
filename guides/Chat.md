@@ -71,3 +71,36 @@ socket.on('sendLocation', (coords) => {
   io.emit('message', `Location: https://www.google.com/maps?q=${coords.latitude},${coords.longitude}`)
 })
 ```
+
+## Acknowledgements
+Once server or client receives the the emitted event, they can send back the optional acknowledgement. 
+```
+Server (emit) >>>>>> Client (receive and sends acknowledgements) >>>>>> server
+Client (emit) >>>>>> Server (receive and sends acknowledgements) >>>>>> Client
+```
+Setting this up requires changes on client and server as they pass an addition cb method.
+```
+src/index.js
+// receiving message
+  socket.on('sendMessage', (message, callback) => {
+    // emit to update all clients
+    io.emit('message', message)
+    // acknowledgement callback - this can be an empty callback 'callback()'
+    // client has got access to 'Delivered!'
+    callback('Delivered!');
+  })
+
+public/js/chat.js
+document.querySelector('#message-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  // const message = document.querySelector('input').value;
+  const message = e.target.elements.message.value
+  // emitting message
+  socket.emit('sendMessage', message, (ackMsg) => {
+    // logging acknowledge message with returned acknowledge message ackMsg = 'Delivered!'
+    console.log('This message is delivered!', ackMsg);
+  })
+});
+```
+Acknowledgements can be quite useful in controlling the type of language used in these messages. To control any rude language we will be using a npm [bad-words](https://www.npmjs.com/package/bad-words) packages to stop profanity.

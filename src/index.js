@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const http = require('http');
 const socketio = require('socket.io');
+const Filter = require('bad-words');
 
 const port = process.env.PORT || 3000;
 
@@ -56,15 +57,26 @@ io.on('connection', (socket) => {
   socket.broadcast.emit('message', 'A new user has joined the chat group!')
 
   // receiving message
-  socket.on('sendMessage', (message) => {
+  socket.on('sendMessage', (message, callback) => {
+    // profamity checks
+    const filter = new Filter()
+
+    if (filter.isProfane(message, 'Welcome')) {
+      return callback('Profanity is not allowed');
+    }
+
     // emit to update all clients
     io.emit('message', message)
+    // acknowledgement callback - this can be an empty callback 'callback()'
+    // client has got access to 'Delivered!'
+    callback();
   })
 
   // recieve Location
-  socket.on('sendLocation', (coords) => {
+  socket.on('sendLocation', (coords, callback) => {
     // https://www.google.com/maps?q=0,0
     io.emit('message', `Location: https://www.google.com/maps?q=${coords.latitude},${coords.longitude}`)
+    callback();
   })
 
   // disconneting a socket connection
