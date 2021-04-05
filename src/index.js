@@ -72,10 +72,11 @@ io.on('connection', (socket) => {
     callback();
   })
 
-  // recieve Location
+  // receive Location
   socket.on('sendLocation', (coords, callback) => {
     // https://www.google.com/maps?q=0,0
-    io.emit('message', `Location: https://www.google.com/maps?q=${coords.latitude},${coords.longitude}`)
+    const url = `https://www.google.com/maps?q=${coords.latitude},${coords.longitude}`;
+    io.emit('locationMessage', url)
     callback();
   })
 

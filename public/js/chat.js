@@ -1,10 +1,15 @@
 const socket = io();
+
+// html selectors
 const $messageForm = document.querySelector('#message-form');
 const $messageFormInput = document.querySelector('input');
 const $messageFormButton = document.querySelector('button');
 const $sendLocationButton = document.querySelector('#send-location');
 const $messages = document.querySelector('#messages');
+
+// template selectors
 const messageTemplate = document.querySelector('#message-template').innerHTML;
+const locationMessageTemplate = document.querySelector('#location-message-template').innerHTML;
 
 // receiving message
 socket.on('message', (message) => {
@@ -13,6 +18,14 @@ socket.on('message', (message) => {
   const html = Mustache.render(messageTemplate, {
     message
   });
+  $messages.insertAdjacentHTML('beforeend', html)
+})
+
+socket.on('locationMessage', (url) => {
+  console.log(`url ${url}`);
+  const html = Mustache.render(locationMessageTemplate, {
+    url
+  })
   $messages.insertAdjacentHTML('beforeend', html)
 })
 
