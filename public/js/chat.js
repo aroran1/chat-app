@@ -3,10 +3,17 @@ const $messageForm = document.querySelector('#message-form');
 const $messageFormInput = document.querySelector('input');
 const $messageFormButton = document.querySelector('button');
 const $sendLocationButton = document.querySelector('#send-location');
+const $messages = document.querySelector('#messages');
+const messageTemplate = document.querySelector('#message-template').innerHTML;
 
 // receiving message
 socket.on('message', (message) => {
   console.log(message);
+  // mustache template to render the dynamic messages
+  const html = Mustache.render(messageTemplate, {
+    message
+  });
+  $messages.insertAdjacentHTML('beforeend', html)
 })
 
 $messageForm.addEventListener('submit', (e) => {
