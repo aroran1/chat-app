@@ -2,32 +2,49 @@
 <html>
   <head>
     <title>Chat app</title>
-    <link rel="icon" href="/img/weather.png" />
+    <link rel="icon" href="/img/favicon.png" />
+    <link rel="stylesheet" href="/css/styles.min.css" />
   </head>
   <body>
     <div class="page">
-      <h1>Chat App</h1>
       <!-- Counter -->
       <!-- <button id="increment">+ 1</button> -->
 
       <!-- Chat -->
-      <div id="messages"></div>
-      <form id="message-form">
-        <input name="message"" type="text" value="" placeholder="type message..." />
-        <button>send</button>
-      </form>
-      <button id="send-location">Send Location</button>
+      <div class="chat">
+        <div class="chat__sidebar">
+          <h1>Chat App</h1>
+        </div>
+        <div class="chat__main">
+          <div id="messages" class="chat__messages"></div>
+          <div class="compose">
+            <form id="message-form">
+              <input name="message"" type="text" value="" placeholder="type message..." />
+              <button>send</button>
+            </form>
+            <button id="send-location">Send Location</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script id="message-template" type="text/html">
-      <div>
-        <p>{{createdAt}} - {{message}}</p>
+      <div class="message">
+        <p>
+          <span class="message__name">Username</span>
+          <span class="message__meta">{{createdAt}}</span>
+        </p>
+        <p>{{message}}</p>
       </div>
     </script>
 
     <script id="location-message-template" type="text/html">
       <div>
-        <p>{{createdAt}} - <a href="{{url}}" target="_blank">My current Location</a></p>
+        <p>
+          <span class="message__name">Username</span>
+          <span class="message__meta">{{createdAt}}</span>
+        </p>
+        <p><a href="{{url}}" target="_blank">My current Location</a></p>
       </div>
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/3.0.1/mustache.min.js"></script>
