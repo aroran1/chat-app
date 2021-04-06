@@ -11,6 +11,9 @@ const $messages = document.querySelector('#messages');
 const messageTemplate = document.querySelector('#message-template').innerHTML;
 const locationMessageTemplate = document.querySelector('#location-message-template').innerHTML;
 
+// query string - use it with join emit ("?username=Test&room=Room")
+const { username, room } = Qs.parse(location.search, { ignoreQueryPrefix: true })
+
 // receiving message
 socket.on('message', (message) => {
   console.log(message);
@@ -77,3 +80,5 @@ $sendLocationButton.addEventListener('click', () => {
     });
   })
 })
+
+socket.emit('join', { username, room }); // listen to this event on src/index.js server file

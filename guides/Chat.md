@@ -105,4 +105,45 @@ document.querySelector('#message-form').addEventListener('submit', (e) => {
 ```
 Acknowledgements can be quite useful in controlling the type of language used in these messages. To control any rude language we will be using a npm [bad-words](https://www.npmjs.com/package/bad-words) packages to stop profanity.
 
-## Converting data string to data object
+## HTML rendering with timestamped objects
+Extracting out the `utils/messages.js` to return an object with passed message and timestamp. This method is used in all the `.emit` methods which is then received by the `.on` methods on chat.js which further formats the timestamp with moment.js and these formatted object properties get used inside Mustache to render the html from `chat.html`.
+Libraries used: Moment.js and Mustache
+
+## Join Form
+Create a join form on the index.html page which on `<form action="/chat.html">` passes the input values as params to the url and changes the page. P.s, make sure the name attribute is set on all the inputs.
+Libraries used: qs.js (query string).
+
+```
+public/js/chat.js
+// query string - ("?username=Test&room=Room") using destructring to retrieve the properties from qs
+// ignoreQueryPrefix is to remove ? from queries
+const { username, room } = Qs.parse(location.search, { ignoreQueryPrefix: true })
+
+// emitting join event which will be listened to in `src/index.js` server file
+socket.emit('join', { username, room });
+```
+
+changing the message emit to sit inside join to below
+```
+// listen to join room event
+socket.on('join', ({ username, room }) => {
+  socket.join(room)
+
+  // emitting message to a specific room
+  socket.emit('message', generateMessage('Welcome!'));
+  // a new user joined chat group announcement
+  socket.broadcast.to(room).emit('message', generateMessage(`${username} has joined!`))
+})
+```
+
+We will be using `socket.join(room)` which allowa us to join a given socket / given chat room, we pass the name of the room. `.join` methods gives us access to additional methods:
+```
+so far used to broadcast
+- socket.emit
+- io.emit
+- socket.boradcast.emit
+
+with socket.join allows us to emit in a particular too with .to.emit as explained below 
+- io.to.emit - it emits an emit to everybody in a specific room
+- socket.boradcast.to(<roomName>).emit - isending an event everyone except a particular client and limiting it a chat room
+```

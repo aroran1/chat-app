@@ -52,10 +52,16 @@ app.use(express.static(publicDirectoryPath));
 
 // chat
 io.on('connection', (socket) => {
-  // emitting message
-  socket.emit('message', generateMessage('Welcome!'));
-  // a new user joined chat group announcement
-  socket.broadcast.emit('message', generateMessage('A new user has joined the chat group!'))
+
+  // listen to join room event
+  socket.on('join', ({ username, room }) => {
+    socket.join(room)
+
+    // emitting message to a specific room
+    socket.emit('message', generateMessage('Welcome!'));
+    // a new user joined chat group announcement
+    socket.broadcast.to(room).emit('message', generateMessage(`${username} has joined!`))
+  })
 
   // receiving message
   socket.on('sendMessage', (message, callback) => {
