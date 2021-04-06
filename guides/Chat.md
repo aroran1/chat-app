@@ -104,3 +104,5 @@ document.querySelector('#message-form').addEventListener('submit', (e) => {
 });
 ```
 Acknowledgements can be quite useful in controlling the type of language used in these messages. To control any rude language we will be using a npm [bad-words](https://www.npmjs.com/package/bad-words) packages to stop profanity.
+
+## Converting data string to data object
