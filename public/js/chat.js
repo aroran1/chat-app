@@ -16,11 +16,12 @@ socket.on('message', (message) => {
   console.log(message);
   // mustache template to render the dynamic messages
   const html = Mustache.render(messageTemplate, {
-    message
+    message: message.text,
+    createdAt: moment(message.createdAt).format('h:mm a')
   });
   $messages.insertAdjacentHTML('beforeend', html)
 })
-
+ 
 socket.on('locationMessage', (url) => {
   console.log(`url ${url}`);
   const html = Mustache.render(locationMessageTemplate, {

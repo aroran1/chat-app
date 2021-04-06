@@ -3,6 +3,7 @@ const express = require('express');
 const http = require('http');
 const socketio = require('socket.io');
 const Filter = require('bad-words');
+const { generateMessage } = require('./utils/messages');
 
 const port = process.env.PORT || 3000;
 
@@ -52,21 +53,21 @@ app.use(express.static(publicDirectoryPath));
 // chat
 io.on('connection', (socket) => {
   // emitting message
-  socket.emit('message', 'Welcome!');
+  socket.emit('message', generateMessage('Welcome!'));
   // a new user joined chat group announcement
-  socket.broadcast.emit('message', 'A new user has joined the chat group!')
+  socket.broadcast.emit('message', generateMessage('A new user has joined the chat group!'))
 
   // receiving message
   socket.on('sendMessage', (message, callback) => {
     // profamity checks
     const filter = new Filter()
 
-    if (filter.isProfane(message, 'Welcome')) {
+    if (filter.isProfane(message, generateMessage('Welcome'))) {
       return callback('Profanity is not allowed');
     }
 
     // emit to update all clients
-    io.emit('message', message)
+    io.emit('message', generateMessage(message))
     // acknowledgement callback - this can be an empty callback 'callback()'
     // client has got access to 'Delivered!'
     callback();
@@ -83,7 +84,7 @@ io.on('connection', (socket) => {
   // disconneting a socket connection
   socket.on('disconnect', () => {
     // socket has already been disconnected so can't emit anymore hence io.emit to announce to all connections
-    io.emit('message', 'A user has left!');
+    io.emit('message', generateMessage('A user has left!'));
   })
 })
 
