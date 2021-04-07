@@ -4,6 +4,7 @@ const http = require('http');
 const socketio = require('socket.io');
 const Filter = require('bad-words');
 const { generateMessage, generateLocationMessage } = require('./utils/messages');
+const { addUsers, removeUser, getUser, getUsersInRoom } = require('./utils/users');
 
 const port = process.env.PORT || 3000;
 
@@ -53,14 +54,26 @@ app.use(express.static(publicDirectoryPath));
 // chat
 io.on('connection', (socket) => {
 
-  // listen to join room event
-  socket.on('join', ({ username, room }) => {
-    socket.join(room)
+// listen to join room event
+ // the 3rd callback function param is for setting the acknowledgement
+  socket.on('join', ({ username, room }, callback) => {
+    // addUser - add user to the users array
+    const {error, user} = addUsers({ id: socket.id, username, room });
+
+    if (error) {
+      // acknowledge if there is an error
+      return callback(error)
+    }
+    // user joining the room by using socket.join
+    socket.join(user.room)
 
     // emitting message to a specific room
     socket.emit('message', generateMessage('Welcome!'));
     // a new user joined chat group announcement
-    socket.broadcast.to(room).emit('message', generateMessage(`${username} has joined!`))
+    socket.broadcast.to(user.room).emit('message', generateMessage(`${user.username} has joined!`))
+
+    // acknowledge if there is no error
+    callback()
   })
 
   // receiving message
@@ -89,8 +102,14 @@ io.on('connection', (socket) => {
 
   // disconneting a socket connection
   socket.on('disconnect', () => {
-    // socket has already been disconnected so can't emit anymore hence io.emit to announce to all connections
-    io.emit('message', generateMessage('A user has left!'));
+    const user = removeUser(socket.id);
+
+    // only show this message if user was part of the group
+    if (user) {
+      // socket has already been disconnected so can't emit anymore hence io.emit to announce to all connections
+      // change io.emit >> io.to(user.room).emit() to only emit event to that particular room 
+      io.to(user.room).emit('message', generateMessage(`${user.username} has left!`));
+    } 
   })
 })
 

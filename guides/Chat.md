@@ -149,4 +149,88 @@ with socket.join allows us to emit in a particular too with .to.emit as explaine
 ```
 
 ## Users
+src/utils/users.js
 - addUsers, removeUsers, getUser, getUsersInRoom
+
+## Tracking users joining / leaving a room
+### addUser
+User joining the room by using socket.join and that's where we need to use that addUser method to add a user to the users array.
+
+Every single connection has a unique id associated with it which comes with socket param of `io.on('connection', (socket) => {` of that particular connection which we will use with our user object as its id value and use to filter users. Since addUser can return either the user object or the error object we have alredy destructured it with ` const {error, user}` and we can handle the outcoem accordingly by notifying the user.
+
+```
+ socket.on('join', ({ username, room }, callback) => {
+    // addUser - add user to the users array
+    const {error, user} = addUsers({ id: socket.id, username, room });
+
+    if (error) {
+      // acknowledge if there is an error
+      return callback(error)
+    }
+    // user joining the room by using socket.join
+    socket.join(user.room)
+
+    // emitting message to a specific room
+    socket.emit('message', generateMessage('Welcome!'));
+    // a new user joined chat group announcement
+    socket.broadcast.to(user.room).emit('message', generateMessage(`${user.username} has joined!`))
+
+    // acknowledge if there is no error
+    callback()
+  })
+```
+Setting up acknowledgement on `public/js/chat.js`
+- alerts the error and redirects the user to the homepage again
+```
+ // listen to this event on src/index.js server file
+ // the 3rd function param is for setting the acknowledgement which gets called with error
+ // if there is an error otherwise just gets called as normal and client can use it to show notification
+socket.emit('join', { username, room }, (error) => {
+  if (error) {
+    alert(error)
+    location.href = '/'
+  }
+});
+```
+
+**code re-structuring** 
+original
+```
+  socket.on('join', ({ username, room }, callback) => {
+    const {error, user} = addUsers({ id: socket.id, username, room });
+```
+convderting { username, room } to options and the using spread `...options` to combine them as addUser param object
+```
+  socket.on('join', (options, callback) => {
+    const {error, user} = addUsers({ id: socket.id, ...options });
+```
+
+Also notice that `socket.on('join', ({ username, room }) => {` is at the parent leve of all the other .on / .emit methods so they have got access to id and room params which we are usinf un the src/utils/users.js to get user or get room.
+
+### removeUser
+original
+```
+// disconneting a socket connection
+ socket.on('disconnect', () => {
+    // socket has already been disconnected so can't emit anymore hence io.emit to announce to all connections
+    io.emit('message', generateMessage(`A user has left!`));
+  })
+```
+changes to
+- storing removed user object locally with `const user = removeUser(socket.id);`
+- only emmit the user left message if user was part of the group with `if (user) {`
+- change `io.emit >> io.to(user.room).emit()` to only emit event to that particular room 
+- updated emit message to show user name ``${user.username} has left!``
+```
+  // disconneting a socket connection
+  socket.on('disconnect', () => {
+    const user = removeUser(socket.id);
+
+    // only show this message if user was part of the group
+    if (user) {
+      // socket has already been disconnected so can't emit anymore hence io.emit to announce to all connections
+      // change io.emit >> io.to(user.room).emit() to only emit event to that particular room 
+      io.to(user.room).emit('message', generateMessage(`${user.username} has left!`));
+    } 
+  })
+```

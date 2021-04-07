@@ -81,4 +81,12 @@ $sendLocationButton.addEventListener('click', () => {
   })
 })
 
-socket.emit('join', { username, room }); // listen to this event on src/index.js server file
+ // listen to this event on src/index.js server file
+ // the 3rd function param is for setting the acknowledgement which gets called with error
+ // if there is an error otherwise just gets called as normal and client can use it to show notification
+socket.emit('join', { username, room }, (error) => {
+  if (error) {
+    alert(error)
+    location.href = '/'
+  }
+});
