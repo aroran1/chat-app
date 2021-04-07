@@ -147,3 +147,6 @@ with socket.join allows us to emit in a particular too with .to.emit as explaine
 - io.to.emit - it emits an emit to everybody in a specific room
 - socket.boradcast.to(<roomName>).emit - isending an event everyone except a particular client and limiting it a chat room
 ```
+
+## Users
+- addUsers, removeUsers, getUser, getUsersInRoom
