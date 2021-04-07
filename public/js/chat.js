@@ -10,6 +10,7 @@ const $messages = document.querySelector('#messages');
 // template selectors
 const messageTemplate = document.querySelector('#message-template').innerHTML;
 const locationMessageTemplate = document.querySelector('#location-message-template').innerHTML;
+const sidebarTemplate = document.querySelector('#sidebar-template').innerHTML;
 
 // query string - use it with join emit ("?username=Test&room=Room")
 const { username, room } = Qs.parse(location.search, { ignoreQueryPrefix: true })
@@ -19,6 +20,7 @@ socket.on('message', (message) => {
   console.log(message);
   // mustache template to render the dynamic messages
   const html = Mustache.render(messageTemplate, {
+    username: message.username,
     message: message.text,
     createdAt: moment(message.createdAt).format('h:mm a')
   });
@@ -28,10 +30,22 @@ socket.on('message', (message) => {
 socket.on('locationMessage', (message) => {
   console.log(message);
   const html = Mustache.render(locationMessageTemplate, {
+    username: message.username,
     url: message.url,
     createdAt: moment(message.createdAt).format('h:mm a')
   })
   $messages.insertAdjacentHTML('beforeend', html)
+})
+
+socket.on('roomData', ({ room, users}) => {
+  console.log(room);
+  console.log(users);
+
+  const html = Mustache.render(sidebarTemplate, {
+    room: room,
+    users: users
+  })
+  document.querySelector('#sidebar').innerHTML = html
 })
 
 $messageForm.addEventListener('submit', (e) => {

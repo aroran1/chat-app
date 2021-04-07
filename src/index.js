@@ -54,11 +54,11 @@ app.use(express.static(publicDirectoryPath));
 // chat
 io.on('connection', (socket) => {
 
-// listen to join room event
- // the 3rd callback function param is for setting the acknowledgement
-  socket.on('join', ({ username, room }, callback) => {
+  // listen to join room event
+  // the 3rd callback function param is for setting the acknowledgement
+  socket.on('join', (options, callback) => {
     // addUser - add user to the users array
-    const {error, user} = addUsers({ id: socket.id, username, room });
+    const {error, user} = addUsers({ id: socket.id, ...options });
 
     if (error) {
       // acknowledge if there is an error
@@ -68,9 +68,16 @@ io.on('connection', (socket) => {
     socket.join(user.room)
 
     // emitting message to a specific room
-    socket.emit('message', generateMessage('Welcome!'));
+    socket.emit('message', generateMessage('Admin', 'Welcome!'));
     // a new user joined chat group announcement
-    socket.broadcast.to(user.room).emit('message', generateMessage(`${user.username} has joined!`))
+    socket.broadcast.to(user.room).emit('message', generateMessage('Admin', `${user.username} has joined!`))
+
+    // maintain active user list with roomData list to pass this to client
+    // emit / update the active users in the roomData each time user joins
+    io.to(user.room).emit('roomData', {
+      room: user.room,
+      users: getUsersInRoom(user.room)
+    })
 
     // acknowledge if there is no error
     callback()
@@ -78,15 +85,18 @@ io.on('connection', (socket) => {
 
   // receiving message
   socket.on('sendMessage', (message, callback) => {
+    // get user info
+    const user = getUser(socket.id);
+
     // profamity checks
     const filter = new Filter()
 
-    if (filter.isProfane(message, generateMessage('Welcome'))) {
+    if (filter.isProfane(message, generateMessage('Admin', 'Welcome'))) {
       return callback('Profanity is not allowed');
     }
 
     // emit to update all clients
-    io.emit('message', generateMessage(message))
+    io.to(user.room).emit('message', generateMessage(user.username, message))
     // acknowledgement callback - this can be an empty callback 'callback()'
     // client has got access to 'Delivered!'
     callback();
@@ -94,9 +104,11 @@ io.on('connection', (socket) => {
 
   // receive Location
   socket.on('sendLocation', (coords, callback) => {
+    const user = getUser(socket.id);
+    console.log(user);
     // https://www.google.com/maps?q=0,0
     const url = `https://www.google.com/maps?q=${coords.latitude},${coords.longitude}`;
-    io.emit('locationMessage', generateLocationMessage(url))
+    io.to(user.room).emit('locationMessage', generateLocationMessage(user.username, url))
     callback();
   })
 
@@ -108,7 +120,14 @@ io.on('connection', (socket) => {
     if (user) {
       // socket has already been disconnected so can't emit anymore hence io.emit to announce to all connections
       // change io.emit >> io.to(user.room).emit() to only emit event to that particular room 
-      io.to(user.room).emit('message', generateMessage(`${user.username} has left!`));
+      io.to(user.room).emit('message', generateMessage('Admin', `${user.username} has left!`));
+
+      // maintain active user list with roomData list to pass this to client
+      // emit / update the active users in the roomData each time user joins
+      io.to(user.room).emit('roomData', {
+        room: user.room,
+        users: getUsersInRoom(user.room)
+      })
     } 
   })
 })

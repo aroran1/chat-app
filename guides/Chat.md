@@ -153,7 +153,7 @@ src/utils/users.js
 - addUsers, removeUsers, getUser, getUsersInRoom
 
 ## Tracking users joining / leaving a room
-### addUser
+### addUser - only send user joined a room message to right room
 User joining the room by using socket.join and that's where we need to use that addUser method to add a user to the users array.
 
 Every single connection has a unique id associated with it which comes with socket param of `io.on('connection', (socket) => {` of that particular connection which we will use with our user object as its id value and use to filter users. Since addUser can return either the user object or the error object we have alredy destructured it with ` const {error, user}` and we can handle the outcoem accordingly by notifying the user.
@@ -207,7 +207,7 @@ convderting { username, room } to options and the using spread `...options` to c
 
 Also notice that `socket.on('join', ({ username, room }) => {` is at the parent leve of all the other .on / .emit methods so they have got access to id and room params which we are usinf un the src/utils/users.js to get user or get room.
 
-### removeUser
+### removeUser - only send user left room message to right room
 original
 ```
 // disconneting a socket connection
@@ -233,4 +233,84 @@ changes to
       io.to(user.room).emit('message', generateMessage(`${user.username} has left!`));
     } 
   })
+```
+
+### getUser - only send message to right room
+- used `getUser` inside `sendMessage` and stored user data to a local const
+- changed `io.emit` to `io.to(user.room).emit` to restrict the message sending to a particular room
+- applied same changes to `sendLocation`
+```
+  // receiving message
+  socket.on('sendMessage', (message, callback) => {
+    // get user info
+    const user = getUser(socket.id);
+
+    // profamity checks
+    const filter = new Filter()
+
+    if (filter.isProfane(message, generateMessage('Welcome'))) {
+      return callback('Profanity is not allowed');
+    }
+
+    // emit to update all clients
+    io.to(user.room).emit('message', generateMessage(message))
+    // acknowledgement callback - this can be an empty callback 'callback()'
+    // client has got access to 'Delivered!'
+    callback();
+  })
+```
+
+## Maintain active users list on client
+To show other users the active users list in the chat room we are maintaing a roomData which will be available in client. To maintain this list every time a user joins a room / leaves a room ie, `socket.on('join'` or `socket.on('disconnect',` we need to emit `io.to(user.room).emit('roomData', {`.
+
+src/index.js
+```
+socket.on('join', (options, callback) => {
+  ...
+  ...
+  // maintain active user list with roomData list to pass this to client
+  // emit / update the active users in the roomData each time user joins
+  io.to(user.room).emit('roomData', {
+    room: user.room,
+    users: getUsersInRoom(user.room)
+  })
+})
+...
+socket.on('disconnect', () => {
+  ...
+  ...
+  // maintain active user list with roomData list to pass this to client
+  // emit / update the active users in the roomData each time user joins
+  io.to(user.room).emit('roomData', {
+    room: user.room,
+    users: getUsersInRoom(user.room)
+  })
+})
+```
+Once in place we need to listen to this event on `public/js/chat.js` 
+```
+const sidebarTemplate = document.querySelector('#sidebar-template').innerHTML;
+socket.on('roomData', ({ room, users}) => {
+  console.log(room);
+  console.log(users);
+
+  const html = Mustache.render(sidebarTemplate, {
+    room: room,
+    users: users
+  })
+  document.querySelector('#sidebar').innerHTML = html
+})
+```
+public/chat.html
+```
+<div id="sidebar" class="chat__sidebar"><!-- Sidebar --></div>
+<script id="sidebar-template" type="text/html">
+  <h2 class="room-title">{{room}}</h2>
+  <h3 class="list-title">Users</h3>
+  <ul class="users">
+    {{#users}}
+      <li>{{username}}</li>
+    {{/users}}
+  </ul>
+</script>
 ```
