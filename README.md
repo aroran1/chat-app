@@ -13,3 +13,7 @@ Client (emit) >>>>>> Server (receive)
 - [Web Sockets](./guides/WebSockets.md)
 - [Real Time](./guides/Realtime.md)
 - [Chat](./guides/Chat.md)
+- [Deployment](./guides/Deployment.md)
+
+## Heroku details
+https://aroran-chatter-box.herokuapp.com/ | https://git.heroku.com/aroran-chatter-box.git

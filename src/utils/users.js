@@ -63,22 +63,22 @@ const getUsersInRoom = (room) => {
 }
 
 // testing addUser
-addUsers({
-  id: 22,
-  username: 'Andrew',
-  room: 'NY'
-})
-addUsers({
-  id: 32,
-  username: 'Mike',
-  room: 'NY'
-})
-addUsers({
-  id: 42,
-  username: 'Andrew',
-  room: 'Chicago'
-})
-console.log(users); 
+// addUsers({
+//   id: 22,
+//   username: 'Andrew',
+//   room: 'NY'
+// })
+// addUsers({
+//   id: 32,
+//   username: 'Mike',
+//   room: 'NY'
+// })
+// addUsers({
+//   id: 42,
+//   username: 'Andrew',
+//   room: 'Chicago'
+// })
+// console.log(users); 
 // TERMINAL OUTPUT
 // [ { id: 22, username: 'test1', room: 'del' } ]
 // const res = addUsers({
