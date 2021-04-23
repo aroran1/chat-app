@@ -1,4 +1,4 @@
-# chat-app
+# Node Chat App
 
 Node chat app built with Express and Socket.io based app to create a realtime chat application.
 
