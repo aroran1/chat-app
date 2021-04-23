@@ -1,6 +1,6 @@
 # chat-app
 
-Express and Socket.io based app to create a realtime chat application.
+Node chat app built with Express and Socket.io based app to create a realtime chat application.
 
 `npm run install`
 
